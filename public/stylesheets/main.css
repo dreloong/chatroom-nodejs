@@ -1,0 +1,26 @@
+html, body {
+  height: 100%;
+}
+
+#chat-room-container {
+  display: none;
+  padding-top: 20px;
+}
+
+#messages-panel-body {
+  height: 500px;
+  overflow-y: scroll;
+}
+
+#username-error {
+  padding-top: 10px;
+}
+
+#username-setup-container {
+  padding-top: 20px;
+}
+
+#users-panel-body {
+  height: 555px;
+  overflow-y: scroll;
+}
