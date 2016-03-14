@@ -1,6 +1,7 @@
 var express = require('express');
 var path = require('path');
 var index = require('./routes/index');
+var MongoClient = require('mongodb').MongoClient;
 var users = {};
 
 var app = express();
@@ -27,6 +28,17 @@ io.on('connection', function(socket) {
       socket.username = username;
       users[username] = socket;
       io.emit('usernames list', Object.keys(users));
+
+      // emit recent messages
+      MongoClient.connect(process.env.MONGOLAB_URI, function(err, db) {
+        var collection = db.collection('messages');
+        var cursor = collection.find().sort({ _id: -1 }).limit(10);
+        cursor.toArray(function(err, result) {
+          result.reverse().forEach(function(info) {
+            socket.emit('new message', info);
+          });
+        });
+      });
     }
   });
 
@@ -55,11 +67,14 @@ io.on('connection', function(socket) {
         callback(false, 'Error: Please add a message.');
       }
     } else {
-      io.emit('new message', {
-        message: message,
-        sender: socket.username,
-        type: 'public'
+      var info = { message: message, sender: socket.username, type: 'public' };
+      // save public message to database
+      MongoClient.connect(process.env.MONGOLAB_URI, function (err, db) {
+        db.collection('messages').insertOne(info, function (err, result) {
+          if (err) { console.warn(err.message); }
+        });
       });
+      io.emit('new message', info);
       callback(true, null);
     }
   });
