@@ -7,6 +7,19 @@ html, body {
   padding-top: 20px;
 }
 
+#message-error {
+  border-radius: 0px;
+  display: none;
+  padding-bottom: 10px;
+  padding-top: 10px;
+  position: absolute;
+  width: 100%;
+}
+
+#messages-panel {
+  position: relative;
+}
+
 #messages-panel-body {
   height: 500px;
   overflow-y: scroll;

@@ -1,10 +1,18 @@
 var socket = io();
 
+var $messageError = $('#message-error');
 var $newMessageText = $('#new-message-text');
 var $usernameText= $('#username-text');
 
 $('#send-message-btn').click(function() {
-  socket.emit('send message', $newMessageText.val());
+  socket.emit('send message', $newMessageText.val(), function(valid, error) {
+    if (valid) {
+      $messageError.hide();
+    } else {
+      $messageError.show();
+      $messageError.html(error);
+    }
+  });
   $newMessageText.val('');
 });
 
@@ -21,10 +29,13 @@ $('#submit-username-btn').click(function() {
 });
 
 socket.on('new message', function(info) {
-  var li = '<li class="media"><div class="media-body"><div class="media">'
-      + '<div class="pull-left">' + info.username + ': </div>'
-      + '<div class="media-body">' + info.message + '<hr /></div>'
-      + '</div></div></li>';
+  var elementClass = info.type === 'private' ? 'media text-info' : 'media';
+
+  var li = '<li class="' + elementClass + '"><div class="media-body">'
+      + '<div class="media"><div class="pull-left">' + info.sender
+      + (info.receiver ? ' to ' + info.receiver : '')
+      + ': </div><div class="media-body">' + info.message
+      + '</div></div></div></li>';
 
   $('#messages-list').append(li);
 });

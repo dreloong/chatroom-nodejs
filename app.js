@@ -25,13 +25,43 @@ io.on('connection', function(socket) {
     } else {
       callback(true);
       socket.username = username;
-      users[username] = true;
+      users[username] = socket;
       io.emit('usernames list', Object.keys(users));
     }
   });
 
-  socket.on('send message', function(message) {
-    io.emit('new message', { message: message, username: socket.username });
+  socket.on('send message', function(message, callback) {
+    message = message.trimLeft();
+    if (message.substring(0, 3) === '/w ') {
+      message = message.substring(3).trimLeft();
+      var index = message.indexOf(' ');
+      if (index !== -1) {
+        var receiver = message.substring(0, index);
+        if (users[receiver]) {
+          message = message.substring(index + 1);
+          [users[receiver], socket].forEach(function(s) {
+            s.emit('new message', {
+              message: message,
+              sender: socket.username,
+              receiver: receiver,
+              type: 'private'
+            });
+          });
+          callback(true, null);
+        } else {
+          callback(false, 'Error: User not found.');
+        }
+      } else {
+        callback(false, 'Error: Please add a message.');
+      }
+    } else {
+      io.emit('new message', {
+        message: message,
+        sender: socket.username,
+        type: 'public'
+      });
+      callback(true, null);
+    }
   });
 
   socket.on('disconnect', function() {
