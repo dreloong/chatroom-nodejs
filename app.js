@@ -21,10 +21,24 @@ server.listen(app.get('port'), function() {
 var io = require('socket.io')(server);
 io.on('connection', function(socket) {
   socket.on('new user', function(username, callback) {
-    if (users[username]) {
-      callback(false);
+    if (username.length < 2 || username.length > 15) {
+      callback({
+        id: 1,
+        description: 'Username should be between 2 and 15 characters.'
+      });
+    } else if (username.match(/^[a-zA-Z]\w*$/) === null) {
+      callback({
+        id: 2,
+        description: 'Username may only contain alphanumeric characters or '
+            + 'underscores, and should start with an alphabetic character.'
+      });
+    } else if (users[username]) {
+      callback({
+        id: 3,
+        description: 'Username already exists.'
+      });
     } else {
-      callback(true);
+      callback(null);
       socket.username = username;
       users[username] = socket;
       io.emit('usernames list', Object.keys(users));

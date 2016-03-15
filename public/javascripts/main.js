@@ -17,12 +17,12 @@ $('#send-message-btn').click(function() {
 });
 
 $('#submit-username-btn').click(function() {
-  socket.emit('new user', $usernameText.val(), function(valid) {
-    if (valid) {
+  socket.emit('new user', $usernameText.val(), function(error) {
+    if (error === null) {
       $('#username-setup-container').hide();
       $('#chat-room-container').show();
     } else {
-      $('#username-error').html('Username already exists. Try another one.');
+      $('#username-error').html(error.description);
     }
   });
   $usernameText.val('');
