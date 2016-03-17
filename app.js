@@ -57,6 +57,7 @@ io.on('connection', function(socket) {
   });
 
   socket.on('send message', function(message, callback) {
+    message = escapeHtml(message);
     message = message.trimLeft();
     if (message.substring(0, 3) === '/w ') {
       message = message.substring(3).trimLeft();
@@ -100,3 +101,12 @@ io.on('connection', function(socket) {
     }
   });
 });
+
+function escapeHtml(text) {
+  return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+ }
